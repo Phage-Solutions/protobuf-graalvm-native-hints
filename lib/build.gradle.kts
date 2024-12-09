@@ -3,6 +3,7 @@ plugins {
 
     id("java-library")
     id("maven-publish")
+    id("signing")
 }
 
 repositories {
@@ -46,14 +47,15 @@ tasks.register<Jar>("javadocJar") {
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Phage-Solutions/protobuf-graalvm-native-hints")
+            name = "MavenCentral"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
             credentials {
-                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+                username = project.findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")
+                password = project.findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
             }
         }
     }
+
     publications {
         create<MavenPublication>("maven") {
             groupId = "sk.phage.spring"
@@ -64,8 +66,38 @@ publishing {
             // Include the sources JAR
             artifact(tasks.named("sourcesJar").get())
 
-            // Optionally include the JavaDocs JAR
+            // Include the JavaDocs JAR
             artifact(tasks.named("javadocJar").get())
+
+            pom {
+                name.set("ProtoBuf GraalVM Native Image Spring Boot native hints")
+                description.set("Native image hints for Spring Boot applications using ProtoBuf")
+
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("daniel-phage")
+                        name.set("Daniel Hladik")
+                        email.set("daniel.hladik@phage.sk")
+                        organization.set("Phage Solutions, s.r.o.")
+                        organizationUrl.set("https://www.phage.sk")
+                    }
+                }
+            }
         }
     }
+}
+
+signing {
+    useInMemoryPgpKeys(
+        System.getenv("GPG_PRIVATE_KEY"),
+        System.getenv("GPG_PASSPHRASE")
+    )
+    sign(publishing.publications["maven"])
 }
