@@ -1,8 +1,10 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
 
     id("java-library")
-    id("maven-publish")
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 repositories {
@@ -43,29 +45,38 @@ tasks.register<Jar>("javadocJar") {
     archiveClassifier.set("javadoc")
 }
 
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Phage-Solutions/protobuf-graalvm-native-hints")
-            credentials {
-                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    signAllPublications()
+    coordinates("sk.phage.spring", rootProject.name, project.version.toString())
+
+    pom {
+        name.set("ProtoBuf GraalVM Native Image Spring Boot native hints")
+        description.set("Native image hints for Spring Boot applications using ProtoBuf")
+        inceptionYear.set("2024")
+        url.set("https://github.com/Phage-Solutions/protobuf-graalvm-native-hints")
+
+        licenses {
+            license {
+                name.set("MIT")
+                url.set("https://opensource.org/licenses/MIT")
             }
         }
-    }
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "sk.phage.spring"
-            artifactId = rootProject.name
 
-            from(components["java"])
+        developers {
+            developer {
+                id.set(System.getenv("POM_DEVELOPER_ID"))
+                name.set(System.getenv("POM_DEVELOPER_NAME"))
+                email.set(System.getenv("POM_DEVELOPER_EMAIL"))
+                organization.set("Phage Solutions, s.r.o.")
+                organizationUrl.set("https://www.phage.sk")
+            }
+        }
 
-            // Include the sources JAR
-            artifact(tasks.named("sourcesJar").get())
-
-            // Optionally include the JavaDocs JAR
-            artifact(tasks.named("javadocJar").get())
+        scm {
+            url.set("https://github.com/Phage-Solutions/protobuf-graalvm-native-hints")
+            connection.set("scm:git:git://github.com/Phage-Solutions/protobuf-graalvm-native-hints.git")
+            developerConnection.set("scm:git:ssh://git@github.com:Phage-Solutions/protobuf-graalvm-native-hints.git")
         }
     }
 }

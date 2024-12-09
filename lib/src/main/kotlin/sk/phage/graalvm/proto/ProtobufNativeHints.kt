@@ -9,9 +9,25 @@ import org.springframework.aot.hint.ExecutableMode
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
+import org.springframework.context.annotation.ImportRuntimeHints
 import java.io.IOException
 import java.util.*
 
+/**
+ * Registers classes for reflection at runtime. This is necessary for protobuf classes to be used in GraalVM native image.
+ *
+ * The classes are registered based on the packages specified in the `META-INF/native-image/protobuf-packages.properties` file.
+ * The file should contain a list of packages to scan for protobuf classes.
+ *
+ * Implements [RuntimeHintsRegistrar] to register hints for reflection and this class must be registered in the Spring context via the [ImportRuntimeHints] annotation.
+ *
+ * @see RuntimeHintsRegistrar
+ * @see ImportRuntimeHints
+ * @see RuntimeHints
+ *
+ * @since 1.0.0
+ * @author Daniel Hladik
+ */
 class ProtobufNativeHints : RuntimeHintsRegistrar {
 
     companion object {
