@@ -1,9 +1,10 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
 
     id("java-library")
-    id("maven-publish")
-    id("signing")
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 repositories {
@@ -44,60 +45,38 @@ tasks.register<Jar>("javadocJar") {
     archiveClassifier.set("javadoc")
 }
 
-publishing {
-    repositories {
-        maven {
-            name = "MavenCentral"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = project.findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")
-                password = project.findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    signAllPublications()
+    coordinates("sk.phage.spring", rootProject.name, project.version.toString())
+
+    pom {
+        name.set("ProtoBuf GraalVM Native Image Spring Boot native hints")
+        description.set("Native image hints for Spring Boot applications using ProtoBuf")
+        inceptionYear.set("2024")
+        url.set("https://github.com/Phage-Solutions/protobuf-graalvm-native-hints")
+
+        licenses {
+            license {
+                name.set("MIT")
+                url.set("https://opensource.org/licenses/MIT")
             }
         }
-    }
 
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "sk.phage.spring"
-            artifactId = rootProject.name
-
-            from(components["java"])
-
-            // Include the sources JAR
-            artifact(tasks.named("sourcesJar").get())
-
-            // Include the JavaDocs JAR
-            artifact(tasks.named("javadocJar").get())
-
-            pom {
-                name.set("ProtoBuf GraalVM Native Image Spring Boot native hints")
-                description.set("Native image hints for Spring Boot applications using ProtoBuf")
-
-                licenses {
-                    license {
-                        name.set("MIT")
-                        url.set("https://opensource.org/licenses/MIT")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("daniel-phage")
-                        name.set("Daniel Hladik")
-                        email.set("daniel.hladik@phage.sk")
-                        organization.set("Phage Solutions, s.r.o.")
-                        organizationUrl.set("https://www.phage.sk")
-                    }
-                }
+        developers {
+            developer {
+                id.set(System.getenv("POM_DEVELOPER_ID"))
+                name.set(System.getenv("POM_DEVELOPER_NAME"))
+                email.set(System.getenv("POM_DEVELOPER_EMAIL"))
+                organization.set("Phage Solutions, s.r.o.")
+                organizationUrl.set("https://www.phage.sk")
             }
         }
-    }
-}
 
-signing {
-    useInMemoryPgpKeys(
-        System.getenv("GPG_PRIVATE_KEY"),
-        System.getenv("GPG_PASSPHRASE")
-    )
-    sign(publishing.publications["maven"])
+        scm {
+            url.set("https://github.com/Phage-Solutions/protobuf-graalvm-native-hints")
+            connection.set("scm:git:git://github.com/Phage-Solutions/protobuf-graalvm-native-hints.git")
+            developerConnection.set("scm:git:ssh://git@github.com:Phage-Solutions/protobuf-graalvm-native-hints.git")
+        }
+    }
 }

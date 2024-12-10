@@ -26,13 +26,13 @@ found [here](https://www.graalvm.org/latest/reference-manual/native-image/dynami
 **Gradle (Groovy)**
 
 ```
-implementation 'sk.phage:protobuf-graalvm-feature:${version}'
+implementation 'sk.phage.spring:protobuf-graalvm-feature:${version}'
 ```
 
 **Gradle (Kotlin DSL):**
 
 ```
-implementation("sk.phage:protobuf-graalvm-feature:${version}")
+implementation("sk.phage.spring:protobuf-graalvm-feature:${version}")
 ```
 
 **Maven**
